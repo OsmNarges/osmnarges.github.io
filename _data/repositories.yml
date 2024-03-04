@@ -1,12 +1,7 @@
 github_users:
-  - torvalds
-  - alshedivat
+  - OsmNarges
 
 github_repos:
-  - alshedivat/al-folio
-  - twbs/bootstrap
-  - jekyll/jekyll
-  - jquery/jquery
-  - FortAwesome/Font-Awesome
-  - jpswalsh/academicons
-  - mathjax/MathJax
+  - OsmNarges/NS-Project
+  - OsmNarges/CAS771-Project
+  - OsmNarges/experimentalPE
