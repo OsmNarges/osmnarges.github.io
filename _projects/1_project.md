@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Dynamic Population Estimation using Telecom Data
+title: Telecom Data Mining
 description: Graph Pattern-based Analysis of Call Detail Records Data for Dynamic Population Estimation
-img: assets/img/projects/pisa_msc_1.jpg
+img: assets/img/projects/dashboard.png
 importance: 1
 category: work
-related_publications: true
+related_publications: false
 ---
 
 In this thesis project at the University of Pisa, I addressed the challenge of dynamic population estimation using telecommunication Call Detail Record (CDR) data as a valuable proxy for human mobility. CDRs are inherently noisy and contain numerous oscillations. In my thesis project, endeavored to identify these noise patterns, known as stationary-state noises, and eliminate them to render the data suitable for human mobility analysis.
@@ -26,7 +26,7 @@ My approach involved employing a graph pattern-based methodology to detect hand-
 
 <div class="row justify-content-sm-center">
     <div class="col-sm-8 mt-3 mt-md-0">
-        {% include figure.liquid path="assets/img/projects/good_pattern1.png" title="Patterns in graphs" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid path="assets/img/projects/good-pattern1.png" title="Patterns in graphs" class="img-fluid rounded z-depth-1" %}
     </div>
     <div class="col-sm-4 mt-3 mt-md-0">
         {% include figure.liquid path="assets/img/projects/running_example_pisa.jpg" title="A CDR timeline" class="img-fluid rounded z-depth-1" %}
