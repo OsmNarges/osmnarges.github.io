@@ -1,80 +1,35 @@
 ---
 layout: page
-title: project 5
-description: a project with a background image
-img: assets/img/1.jpg
+title: Social Network Analysis
+description: Hashtag Co-occurrence Network during World Cup 2018
+img: assets/img/projects/hashtag_2.png
 importance: 3
-category: fun
+category: work
 ---
 
-Every project has a beautiful feature showcase page.
-It's easy to include images in a flexible 3-column grid format.
-Make your photos 1/3, 2/3, or full width.
+The FIFA World Cup, often simply called the WorldCup, is an international football competition among different nations which is held once every four years. This event was one of the main highlighted sportive events during June and July 2018 and had so many fans and followers around the world. Twitter users are no exception and followed this event eagerly by tweeting about different topics including matches and events, using different hashtags. The main hashtag during this event was #WorldCup. Users appended this hashtag to their tweets along with some other hashtags and expressed their ideas. Also this event was a great opportunity for some of the users to express their off-topic ideas, including political, economical, cultural and environmental issues.
 
-To give your project a background in the portfolio page, just add the img tag to the front matter like so:
 
-    ---
-    layout: page
-    title: project
-    description: a project with a background image
-    img: /assets/img/12.jpg
-    ---
-
-<div class="row">
-    <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid loading="eager" path="assets/img/1.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
-    </div>
-    <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid loading="eager" path="assets/img/3.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
-    </div>
-    <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid loading="eager" path="assets/img/5.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
-    </div>
-</div>
-<div class="caption">
-    Caption photos easily. On the left, a road goes through a tunnel. Middle, leaves artistically fall in a hipster photoshoot. Right, in another hipster photoshoot, a lumberjack grasps a handful of pine needles.
-</div>
-<div class="row">
-    <div class="col-sm mt-3 mt-md-0">
-        {% include figure.liquid loading="eager" path="assets/img/5.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
-    </div>
-</div>
-<div class="caption">
-    This image can also have a caption. It's like magic.
-</div>
-
-You can also put regular text between your rows of images.
-Say you wanted to write a little bit about your project before you posted the rest of the images.
-You describe how you toiled, sweated, _bled_ for your project, and then... you reveal its glory in the next row of images.
+In this project, we study the various kinds of concerns raised by Twitter users, in terms of hashtags during the period of World Cup. We envisioned a network of hashtags, in which hashtags are related if they co- occur in a tweet and related hashtags are in clearly-cut communities. Since World Cup 2018 started from June 14, 2018, we collected all the tweets containing #WorldCup in the first week of the games (14th - 21st). Among different spelling variants, the hashtag #WorldCup had %81 of frequency and #worldcup had %16 of frequency1 . Thus, we also collected tweets containing #worldcup. For the first week, we gathered 1,809,545 tweets, containing #WorldCup or #worldcup.
 
 <div class="row justify-content-sm-center">
-    <div class="col-sm-8 mt-3 mt-md-0">
-        {% include figure.liquid path="assets/img/6.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.liquid path="assets/img/projects/hashtag_1.png" title="Largest hubs in our crawled network" class="img-fluid rounded z-depth-1" %}
     </div>
+    <div class="col-sm mt-3 mt-md-0">
+        {% include figure.liquid path="assets/img/projects/hashtag_2.png" title="Communities identified by Louvain" class="img-fluid rounded z-depth-1" %}
+    </div>
+</div>
+<div class="caption">
+    Largest hubs in our crawled network. Communities identified by Louvain.
+</div>
+
+
+<div class="row justify-content-sm-center">
     <div class="col-sm-4 mt-3 mt-md-0">
-        {% include figure.liquid path="assets/img/11.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
+        {% include figure.liquid loading="eager" path="assets/img/projects/hashtag_3.png" title="Degree Distribution of Our Hashtag Co-Occurence Network" class="img-fluid rounded z-depth-1" %}
     </div>
 </div>
 <div class="caption">
-    You can also have artistically styled 2/3 + 1/3 images, like these.
+    Degree Distribution of Our Hashtag Co-Occurence Network
 </div>
-
-The code is simple.
-Just wrap your images with `<div class="col-sm">` and place them inside `<div class="row">` (read more about the <a href="https://getbootstrap.com/docs/4.4/layout/grid/">Bootstrap Grid</a> system).
-To make images responsive, add `img-fluid` class to each; for rounded corners and shadows use `rounded` and `z-depth-1` classes.
-Here's the code for the last row of images above:
-
-{% raw %}
-
-```html
-<div class="row justify-content-sm-center">
-  <div class="col-sm-8 mt-3 mt-md-0">
-    {% include figure.liquid path="assets/img/6.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
-  </div>
-  <div class="col-sm-4 mt-3 mt-md-0">
-    {% include figure.liquid path="assets/img/11.jpg" title="example image" class="img-fluid rounded z-depth-1" %}
-  </div>
-</div>
-```
-
-{% endraw %}

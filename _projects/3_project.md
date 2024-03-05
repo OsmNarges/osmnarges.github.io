@@ -1,6 +1,6 @@
 ---
 layout: page
-title: project 3
+title: AIS Data Mining
 description: A Pipeline for Pre-Processing, Cleansing, and Visualizing AIS data with Ports Network Generation
 img: assets/img/projects/ais-cruise-zoomed.png
 importance: 3
