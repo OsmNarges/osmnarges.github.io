@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visual Analysis of Senegal Data</title>
+
+    <link rel="stylesheet" href="keen-dashboards.css">
+    <link rel="stylesheet" href="custom.css">
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="dc.css">
+
+
+</head>
+<body class="application">
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="./">Visual Analysis of Senegal Data</a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <!-- Time Chart -->
+        <div class="col-sm-12">
+            <div class="chart-wrapper">
+                <div class="chart-title">
+                    Time Series Analysis
+                </div>
+                <div class="chart-stage">
+                    <div id="time-chart"></div>
+                    <div id="overview-time-chart"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Time Chart -->
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="chart-wrapper">
+                        <div class="chart-title">
+                            Hours of Day HeatMap
+                        </div>
+                        <div class="chart-stage">
+                            <div id="heatmap"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="chart-wrapper">
+                        <div class="chart-title">
+                            Aggregated HeatMap
+                        </div>
+                        <div class="chart-stage">
+                            <div id="heatmapAgg"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <!-- Resources Pie -->
+                <div class="col-sm-6">
+                    <div class="chart-wrapper">
+                        <div class="chart-title">
+                            Search By UID
+                        </div>
+                        <div class="chart-stage">
+                            <div id="search">Type the User ID to show the detailed information:</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Resources Pie -->
+
+                <!-- Poverty Pie -->
+
+                <div class="col-sm-6">
+                    <div class="chart-wrapper">
+                        <div class="chart-title">
+                            Data Count
+                        </div>
+                        <div class="chart-stage">
+                            <div id="data-count">
+                                <span class="filter-count"></span> selected out of <span class="total-count"></span> reading records | <a
+                                    href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- Poverty Pie -->
+
+        <!-- Map -->
+        <div class="col-sm-6">
+            <div class="chart-wrapper">
+                <div class="chart-title">
+                    Senegal's Map
+                </div>
+                <div class="chart-stage">
+                    <div id="senegalMap" style='z-index: 1'></div>
+                    <div id="dakarMap" style='z-index: 2; position: absolute; border-style: dotted; border-width: 2px;'></div>
+                    <!--<img src="map.jpg" style='height: 80%; width: 80%; object-fit: contain'> -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- Map -->
+</div>
+
+<style>
+
+    #graph {
+        width: 600px;
+        height: 600px;
+        margin:auto;
+        background-size:auto 100%;
+        background-position:center top;
+    }
+    .heat-box {
+        stroke: #E6E6E6;
+        stroke-width: 2px;
+    }
+
+</style>
+
+
+
+</div>
+
+<!-- <div id="search">Type the Car ID to show the detailed information:</div> -->
+<div class="row">
+
+    <div class="col-sm-12">
+
+        <div class="chart-wrapper">
+            <div class="chart-title">
+                Table
+            </div>
+
+            <div class="chart-stage">
+                <table class="table table-hover dc-data-table">
+                </table>
+                <div id="paging">
+                    Showing <span id="begin"></span>-<span id="end"></span>
+                    <input id="last" class="btn" type="Button" value="Last" onclick="javascript:last()" />
+                    <input id="next" class="btn" type="button" value="Next" onclick="javascript:next()"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+
+<script src="crossfilter2.js"></script>
+<script src="d32.js"></script>
+<script src="dc2.js"></script>
+
+<script>
+    var ndx;
+    var ofs = 0, pag = 17;
+    function display() {
+        d3.select('#begin')
+            .text(ofs);
+        d3.select('#end')
+            .text(ofs+pag-1);
+        d3.select('#last')
+            .attr('disabled', ofs-pag<0 ? 'true' : null);
+        d3.select('#next')
+            .attr('disabled', ofs+pag>=ndx.size() ? 'true' : null);
+    }
+    function update() {
+        visTable.beginSlice(ofs);
+        visTable.endSlice(ofs+pag);
+        display();
+    }
+    function next() {
+        ofs += pag;
+        update();
+        visTable.redraw();
+    }
+    function last() {
+        ofs -= pag;
+        update();
+        visTable.redraw();
+    }
+
+    //var carTypeChart = dc.rowChart("#carTypeRowChart"),
+        //carIDChart = dc.rowChart("#car-id-chart"),
+    //var arrIDChart = dc.pieChart("#arr-id-chart"),
+        //gateNameChart = dc.rowChart("#gateNameRowChart"),
+    var timeChart = dc.seriesChart("#time-chart"),
+        senChart = dc.geoChoroplethChart("#senegalMap"),
+        dakChart = dc.geoChoroplethChart("#dakarMap"),
+        //focusChart = dc.seriesChart("#time-chart"),
+        overviewChart = dc.seriesChart("#overview-time-chart");
+        visCount = dc.dataCount("#data-count"),
+        visTable = dc.dataTable(".dc-data-table"),
+        //select2 = dc.selectMenu('#car-id-chart'),
+        heatMapChart = dc.heatMap("#heatmap"),
+        heatMapAggChart = dc.heatMap("#heatmapAgg"),
+        searchBox = dc.textFilterWidget("#search");
+
+    // Full dataset could give issues because of gzip
+    // var url = "Lekagul Sensor Data.csv.gz";
+    var url = "Lekagul Sensor Data.csv";
+
+    var promises = [];
+    promises.push(d3.csv("dataSenSig94.csv"));
+    promises.push(d3.json("sen-arrays4.json"));
+    promises.push(d3.json("onTop.json"));
+
+
+    Promise.all(promises).then(function(values) {
+        //uid;ts;arr_id
+        //2356;2015-03-02 20:39:00;13
+
+        dataSen = values[0];
+        statesJson = values[1];
+        dakarJson = values[2];
+        //console.log(nodePositionInfo);
+
+        //var dateFormat = d3.timeFormat("%Y-%m-%d");
+        var parseUTCDate = d3.utcParse("%Y-%m-%d %H:%M:%S");
+        var formatUTCDate = d3.timeFormat("%Y-%m-%d");
+        //var formatUTCDateWithTime = d3.timeFormat("%Y-%m-%d %H:%M:%S");
+        var parseDate = d3.timeParse("%Y-%m-%d");
+        var parseDateWithTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
+        var formatHour = d3.timeFormat("%H");
+        var formatDay = d3.timeFormat("%a");  //a
+        var formatWeekNumber = d3.timeFormat("%V");
+        var ii = 0;
+        dataSen.forEach(function (d) {
+            var z = 4 - d["uid"].length;
+            var zeros = "0".repeat(z);
+            d["uid"] = zeros + d["uid"];
+
+            d["FullTimestamp"] = parseDateWithTime(d["ts"]);
+            d["Day"] = parseDate(formatUTCDate(parseUTCDate(d["ts"]))); //dateFormat(d["Timestamp"]);
+            d["Hour"] = formatHour(parseDateWithTime(d["ts"]));
+            d["Weekday"] = formatDay(parseDateWithTime(d["ts"]));
+            d["WeekNumber"] = formatWeekNumber(parseDateWithTime(d["ts"]));
+
+            //d["Timestamp"].setDate(1);
+        });
+
+        ndx = crossfilter(dataSen);
+        var all = ndx.groupAll();
+
+        var uidDim = ndx.dimension(function (d) { return d["uid"]; });
+        var arr_idDim = ndx.dimension(function (d) { return d["arr_id"]; });
+        var arr_idDimDakar = ndx.dimension(function (d) { return d["arr_id"]; });
+        //var gateTypeDim = ndx.dimension(function (d) { return d["gate-type"]; });
+        var dateDim = ndx.dimension(function (d) { return d["Day"]; });
+        var dateTimeDim = ndx.dimension(function (d) { return d["FullTimestamp"]; });
+        var dayHourDim = ndx.dimension(function(d) { return [d["Hour"], d["Weekday"]]; });
+        var aggDailyDim = ndx.dimension(function(d) {
+            var hourAgg;
+
+            //original
+            // if (0 <= d["Hour"] && d["Hour"] <= 7) {
+            //     hourAgg = "t1"
+            // }
+            // else if (8 <= d["Hour"] && d["Hour"] <= 18) {
+            //     hourAgg = "t2"
+            // }
+            // else {
+            //     hourAgg = "t3"
+            // }
+
+            //new aggregation
+//             if (0 <= d["Hour"] && d["Hour"] <= 3) {
+//                 hourAgg = "t1"  //Late Night
+//             }
+//             else if (4 <= d["Hour"] && d["Hour"] <= 9) {
+//                 hourAgg = "t2"  //Morning Hours
+//             }
+//             else if (10 <= d["Hour"] && d["Hour"] <= 18) {
+//                 hourAgg = "t3"  //MidDay Hours
+//             }
+//             else {
+//                 hourAgg = "t4"  //Evening Hours
+//             }
+            
+            //new aggregation
+            if (0 <= d["Hour"] && d["Hour"] <= 7) {
+                hourAgg = "t1"  //Late Night
+            }
+            else if (8 <= d["Hour"] && d["Hour"] <= 18) {
+                hourAgg = "t2"  //Morning Hours
+            }
+            else {
+                hourAgg = "t3"  //Evening Hours
+            }
+            var dayAgg;
+            var weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+            var weekend = ["Sat", "Sun"];
+            if (weekdays.indexOf(d["Weekday"]) > -1) {
+                dayAgg = "WD"
+            }
+            else {
+                dayAgg = "WE"
+            }
+            //return [hourAgg, d["Weekday"]];
+            //return [hourAgg, dayAgg];
+            return [[d["WeekNumber"], dayAgg], hourAgg];
+        });
+        console.log(dayHourDim.top(1));
+
+
+
+        //var overviewDim = ndx.dimension(function(d) { return d["Timestamp"]; });
+
+        //var carTypeGroup = carTypeDim.group();
+        var uidGroup = uidDim.group();
+        var arr_idGroup = arr_idDim.group();
+        //console.log(gateNameGroup.top(40));
+
+        //var gateTypeGroup = gateTypeDim.group();
+        var dateGroup = dateDim.group();//.reduceCount();
+        var dateTimeGroup = dateTimeDim.group();
+        var dayHourGroup = dayHourDim.group().reduceCount();
+        var aggDailyGroup = aggDailyDim.group().reduceCount();
+        var totalCallByArr = arr_idDim.group().reduceCount();
+        var totalCallByArrDakar = arr_idDimDakar.group().reduceCount();
+
+        var a = aggDailyDim.group().reduceSum(function(fact) { return fact.FullTimestamp; }).top(5);
+        console.log(a);
+        console.log("There are " + a[0].value + " " + a[0].key + "(s) in my house.");
+
+        //var overviewGroup = overviewDim.group();
+        //var dateGroup = dateDim.group();
+        //var overviewRunGroup = overviewRunDimension.group();
+
+        //runGroup = runDimension.group().reduceSum(function(d) { return +d.Speed; });
+        //var max_state = totalDonationsByState.top(1)[0].value;
+        var max_state = totalCallByArr.top(1)[0].value
+        //console.log(totalCallByArr.top(10)[0].value)
+
+        var minDate = dateDim.bottom(1)[0]["Day"];
+        var maxDate = dateDim.top(1)[0]["Day"];
+
+        //var minCarID = carIDDim.bottom(1)[0]["car-id"];
+        //var maxCarID = carIDDim.top(1)[0]["car-id"];
+
+        // scale for coloring nodes
+        var gateColor = {"general-gate": "blue", "ranger-stop": "yellow", "entrance": "green", "camping": "orange",
+            "gate": "red", "ranger-base": "purple"};
+        var colorX = d3.scaleOrdinal()
+            .range(["blue", "yellow", "green", "orange", "red", "purple"]);
+
+        console.log(minDate);
+        console.log(maxDate);
+
+
+
+        timeChart
+            .width(1200)
+            .height(150)
+            //.margins({top: 10, right: 50, bottom: 30, left: 50})
+            //.chart(function(c) { return dc.lineChart(c).curve(d3.curveCardinal).evadeDomainFilter(true); })
+            .chart(function(c) { return dc.lineChart(c).evadeDomainFilter(true); })
+            .dimension(dateDim)
+            .group(dateGroup)
+            .x(d3.scaleTime().domain([minDate, maxDate]))
+            .brushOn(false)
+            .yAxisLabel("Count")
+            .yAxisPadding("5%")
+            .elasticY(true)
+            .xAxisLabel("Weeks")
+            //.mouseZoomable(true)
+            //.xUnits(d3.timeWeeks)  //Doesn't work correctly
+            .seriesAccessor(function(d) {return "Expt: " + d.key[0];})
+            .rangeChart(overviewChart)
+            //.xAxis().ticks(30)
+            .yAxis().ticks(5);
+        timeChart.margins().left += 15;
+
+
+        overviewChart
+            .width(1200)
+            .height(60)
+            .chart(function(c) { return dc.lineChart(c).evadeDomainFilter(true); })
+            .x(d3.scaleTime().domain([minDate, maxDate]))
+            .brushOn(true)
+            //.yAxisLabel("Count")
+            //.xAxisLabel("Month")
+            //.clipPadding(10)
+            .dimension(dateDim)
+            .group(dateGroup)
+            .seriesAccessor(function(d) {return "Expt: " + d.key[0];})
+            .margins().left += 27;
+        overviewChart.xAxis().ticks(30);
+        //.keyAccessor(function(d) {return +d.key[1];})
+        //.valueAccessor(function(d) {return +d.value - 500;});
+        var heatColors = ["#6363FF", "#6373FF", "#63A3FF", "#63E3FF", "#63FFFB", "#63FFCB",
+            "#63FF9B", "#63FF6B", "#7BFF63", "#BBFF63", "#DBFF63", "#FBFF63",
+            "#FFD363", "#FFB363", "#FF8363", "#FF7363", "#FF6364"];
+        var heatmapColor = d3.scaleLinear()
+            .domain([0, 2000])
+            .range(["#6363FF",  "#FF6364"]);
+
+        heatMapChart
+            .width(600)
+            .height(140)
+            .dimension(dayHourDim)
+            .group(dayHourGroup)
+            .keyAccessor(function(d) {
+                return d.key[0]; })
+            .valueAccessor(function(d) {
+                return d.key[1]; })
+            .title(function(d) {
+                return d.value;})
+            .colorAccessor(function(d) { return d.value; })
+            //.colors(["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"])
+            .colors(function(d){
+                //console.log(dayHourGroup.top(1)[0].value);
+                //console.log(dayHourGroup.bottom(1));
+                //console.log(d);
+                var maxValue = dayHourGroup.top(1)[0].value;
+                if (d==0){
+                    return "#FFFFFF"
+                }
+
+                return d3.scaleLinear()
+                    .domain([0, maxValue])
+                    .range(["#6363FF",  "#FF6364"])(d); });
+
+        heatMapAggChart
+            .width(600)
+            .height(140)
+            .dimension(aggDailyDim)
+            .group(aggDailyGroup)
+            .keyAccessor(function(d) {
+                return d.key[0]; })
+            .valueAccessor(function(d) {
+                return d.key[1]; })
+            .title(function(d) {
+                return d.value;})
+            .colorAccessor(function(d) { return d.value; })
+            //.colors(["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"])
+            .colors(function(d){
+                //console.log(dayHourGroup.top(1)[0].value);
+                //console.log(dayHourGroup.bottom(1));
+                //console.log(d);
+                var maxValue = aggDailyGroup.top(1)[0].value;
+                if (d==0){
+                    return "#FFFFFF"
+                }
+
+                return d3.scaleLinear()
+                    .domain([0, maxValue])
+                    .range(["#6363FF",  "#FF6364"])(d); });
+
+        visCount
+            .dimension(ndx)
+            .group(all);
+
+        visTable
+            .dimension(dateTimeDim)
+            // Data table does not use crossfilter group but rather a closure
+            // as a grouping function
+            .group(function (d) {
+                //var format = d3.format('02d');
+                //return d.Timestamp.getFullYear() + '/' + format((d.Timestamp.getMonth() + 1));
+                return d["uid"];
+            })
+            .columns([
+                "FullTimestamp",
+                "uid",
+                "arr_id"
+            ])
+            .size(Infinity)
+            .sortBy(function(d){ return d["FullTimestamp"]; })
+            .order(d3.ascending);
+
+        searchBox.dimension(uidDim);
+
+        senChart.width(700)
+            .height(450)
+            .dimension(arr_idDim)
+            .group(totalCallByArr)
+            //.colors(["#E2F2FF", "#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#0061B5"])
+            //.colorDomain([0, max_state])
+            .colors(function(d){
+                //console.log(dayHourGroup.top(1)[0].value);
+                //console.log(dayHourGroup.bottom(1));
+                //console.log(d);
+                var maxValue = totalCallByArr.top(1)[0].value;
+                if (d==0){
+                    return "#e2e2e2"
+                }
+
+                return d3.scaleLinear()
+                    .domain([0, maxValue])
+                    .range(["#6363FF",  "#FF6364"])(d); })
+            .overlayGeoJson(statesJson["features"], "state", function (d) {
+                return d.properties.arr_id.toString();
+            })
+            .projection(d3.geoMercator()
+                .scale(5700)  //5700   //scale(15700)
+                .center([-14.5, 15.5])
+                .translate([ 370, 120 ])  //translate([ 310, 120 ])    //translate([ 900, 120 ])
+            )
+            .title(function (p) {
+                return "arr_id: " + p["key"]
+                    + "\n"
+                    + "Total Calls: " + Math.round(p["value"]);
+            })
+
+        dakChart.width(150)
+            .height(100)
+            .dimension(arr_idDimDakar)
+            .group(totalCallByArrDakar)
+            //.colors(["#E2F2FF", "#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#0061B5"])
+            //.colorDomain([0, max_state])
+            .colors(function(d){
+                //console.log(dayHourGroup.top(1)[0].value);
+                //console.log(dayHourGroup.bottom(1));
+                //console.log(d);
+                var maxValue = totalCallByArr.top(1)[0].value;
+                if (d==0){
+                    return "#e2e2e2"
+                }
+
+                return d3.scaleLinear()
+                    .domain([0, maxValue])
+                    .range(["#6363FF",  "#FF6364"])(d); })
+            .overlayGeoJson(dakarJson["features"], "dakar", function (d) {
+                return d.properties.arr_id.toString();
+            })
+            .projection(d3.geoMercator()
+                .scale(17700)  //5700   //scale(15700)
+                .center([-17.5, 14.5])
+                .translate([ 10, 130 ])  //translate([ 310, 120 ])    //translate([ 900, 120 ])
+            )
+            .title(function (p) {
+                return "arr_id: " + p["key"]
+                    + "\n"
+                    + "Total Calls: " + Math.round(p["value"]);
+            })
+
+        update();
+        dc.renderAll();
+
+
+    });
+
+
+
+</script>
+
+
+</body>
+</html>
