@@ -16,8 +16,8 @@ selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+I am a graduate student in Computer Science at McMaster University's Faculty of Engineering. In pursuit of my Master's thesis at McMaster, I focused on building an innovative editor tailored for teaching Elm programming and computer science fundamentals to kids and novice programmers.
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+My academic journey spans across continents, as I hold another Master's degree from the University of Pisa, Italy, specializing in Digital Humanities. During my time there, I immersed myself in data science courses and undertook a thesis centered on telecom data science, which reflects my passion in data science, analytics and machine learning.
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+From developing educational tools to delving into telecom data analytics, my diverse experiences have honed my skills and fueled my enthusiasm for leveraging data-driven approaches to solve real-world challenges. You can find more details about some of my projects on the projects page. [projects page](/projects/)
