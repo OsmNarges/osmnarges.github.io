@@ -20,4 +20,4 @@ I am a graduate student in Computer Science at McMaster University's Faculty of 
 
 My academic journey spans across continents, as I hold another Master's degree from the University of Pisa, Italy, specializing in Digital Humanities. During my time there, I immersed myself in data science courses and undertook a thesis centered on telecom data science, which reflects my passion in data science, analytics and machine learning.
 
-From developing educational tools to delving into telecom data analytics, my diverse experiences have honed my skills and fueled my enthusiasm for leveraging data-driven approaches to solve real-world challenges. You can find more details about some of my projects on the projects page. [projects page](/projects/)
+From developing educational tools to delving into telecom data analytics, my diverse experiences have honed my skills and fueled my enthusiasm for leveraging data-driven approaches to solve real-world challenges. You can find more details about some of my projects on the [projects page](/projects/).
