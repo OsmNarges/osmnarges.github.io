@@ -9,14 +9,14 @@ profile:
   image: narges.jpg
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>Ancaster, ON, Canada</p>
+    <p>Waterdown, ON, Canada</p>
 
 news: false # includes a list of news items
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-I am a graduate student in Computer Science at McMaster University's Faculty of Engineering. In pursuit of my Master's thesis at McMaster, I focused on building an innovative editor tailored for teaching Elm programming and computer science fundamentals to kids and novice programmers.
+I am a Computer Science graduate from McMaster University’s Faculty of Engineering. For my Master’s thesis at McMaster, I focused on building an innovative editor tailored for teaching Elm programming and computer science fundamentals to kids and novice programmers.
 
 My academic journey spans across continents, as I hold another Master's degree from the University of Pisa, Italy, specializing in Digital Humanities. During my time there, I immersed myself in data science courses and undertook a thesis centered on telecom data science, which reflects my passion in data science, analytics and machine learning.
 
