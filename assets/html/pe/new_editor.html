@@ -5683,13 +5683,13 @@ var $author$project$Main$initModel = function () {
 			['Start of the code']),
 		location: A3(
 			$author$project$Types$LocDef,
-			ifsDef,
+			resultDef,
 			A2(
 				$author$project$Types$DefExpInModule,
 				_List_fromArray(
-					[beforeDef]),
+					[beforeDef, shapeTypeDef]),
 				_List_fromArray(
-					[afterDef])),
+					[afterDef, def3, compDef, ifDef, ifsDef, numTestDef, myAddDef, sinHoleDef, useDef2IntDef, useDef2FloatDef, newDef2, newDef1, aaDef, floatValDef])),
 			$author$project$Types$CaretAt(
 				{column: 0, line: 0})),
 		redoFuture: _List_Nil,
@@ -22893,26 +22893,98 @@ var $author$project$Main$viewClipboard = function (model) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #ddd'),
-				A2($elm$html$Html$Attributes$style, 'padding-top', '4px'),
 				A2($elm$html$Html$Attributes$style, 'margin-top', 'auto'),
-				A2($elm$html$Html$Attributes$style, 'height', '200px'),
-				A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto')
+				A2($elm$html$Html$Attributes$style, 'height', '300px'),
+				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+				A2($elm$html$Html$Attributes$style, 'justify-content', 'center'),
+				A2($elm$html$Html$Attributes$style, 'align-items', 'flex-start')
 			]),
-		A2(
-			$elm$core$List$cons,
-			A2(
+		_List_fromArray(
+			[
+				A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
-						A2($elm$html$Html$Attributes$style, 'margin-bottom', '4px')
+						A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+						A2($elm$html$Html$Attributes$style, 'width', '92%'),
+						A2($elm$html$Html$Attributes$style, 'max-width', '280px'),
+						A2($elm$html$Html$Attributes$style, 'height', '100%'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#e3e4ec'),
+						A2($elm$html$Html$Attributes$style, 'border-radius', '12px'),
+						A2($elm$html$Html$Attributes$style, 'box-shadow', '0 2px 4px rgba(0,0,0,0.18)')
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Clipboard')
-					])),
-			A2($elm$core$List$indexedMap, renderItem, items)));
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+								A2($elm$html$Html$Attributes$style, 'top', '-12px'),
+								A2($elm$html$Html$Attributes$style, 'left', '50%'),
+								A2($elm$html$Html$Attributes$style, 'transform', 'translateX(-50%)'),
+								A2($elm$html$Html$Attributes$style, 'width', '60px'),
+								A2($elm$html$Html$Attributes$style, 'height', '26px'),
+								A2($elm$html$Html$Attributes$style, 'background-color', '#000'),
+								A2($elm$html$Html$Attributes$style, 'border-radius', '14px 14px 8px 8px'),
+								A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+								A2($elm$html$Html$Attributes$style, 'justify-content', 'center'),
+								A2($elm$html$Html$Attributes$style, 'align-items', 'center')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'width', '18px'),
+										A2($elm$html$Html$Attributes$style, 'height', '18px'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#fff'),
+										A2($elm$html$Html$Attributes$style, 'border-radius', '50%')
+									]),
+								_List_Nil)
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+								A2($elm$html$Html$Attributes$style, 'flex-direction', 'column'),
+								A2($elm$html$Html$Attributes$style, 'height', '100%'),
+								A2($elm$html$Html$Attributes$style, 'padding-top', '6px')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										A2($elm$html$Html$Attributes$style, 'margin', '0 8px 8px 8px'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#f7f7fb'),
+										A2($elm$html$Html$Attributes$style, 'border-radius', '6px'),
+										A2($elm$html$Html$Attributes$style, 'padding', '4px 4px 4px 4px'),
+										A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box'),
+										A2($elm$html$Html$Attributes$style, 'height', 'calc(100% - 8px)'),
+										A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto')
+									]),
+								$elm$core$List$isEmpty(items) ? _List_fromArray(
+									[
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												A2($elm$html$Html$Attributes$style, 'font-size', '11px'),
+												A2($elm$html$Html$Attributes$style, 'color', '#777'),
+												A2($elm$html$Html$Attributes$style, 'padding', '4px')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Nothing copied yet.')
+											]))
+									]) : A2($elm$core$List$indexedMap, renderItem, items))
+							]))
+					]))
+			]));
 };
 var $author$project$EditorUtils$calculateCaretPosition = F2(
 	function (mbb, pos) {
@@ -24043,12 +24115,10 @@ var $author$project$Main$viewEvalPane = function (model) {
 		_List_fromArray(
 			[
 				A2($elm$html$Html$Attributes$style, 'height', '200px'),
-				A2($elm$html$Html$Attributes$style, 'padding', '8px'),
+				A2($elm$html$Html$Attributes$style, 'padding', '0 8px 10px 8px'),
 				A2($elm$html$Html$Attributes$style, 'border-right', '1px solid #ccc'),
 				A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
-				A2($elm$html$Html$Attributes$style, 'font-size', '14px'),
-				A2($elm$html$Html$Attributes$style, 'background-color', '#f5f5ff'),
-				A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto')
+				A2($elm$html$Html$Attributes$style, 'font-size', '13px')
 			]),
 		_List_fromArray(
 			[
@@ -24056,23 +24126,41 @@ var $author$project$Main$viewEvalPane = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
-						A2($elm$html$Html$Attributes$style, 'margin-bottom', '6px')
+						A2($elm$html$Html$Attributes$style, 'margin', '8px 4px'),
+						A2($elm$html$Html$Attributes$style, 'padding', '8px 10px'),
+						A2($elm$html$Html$Attributes$style, 'border-radius', '8px'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#f5f7ff'),
+						A2($elm$html$Html$Attributes$style, 'box-shadow', '0 1px 2px rgba(0,0,0,0.08)'),
+						A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto')
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Value at cursor')
-					])),
-				A2(
-				$elm$html$Html$pre,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'white-space', 'pre-wrap'),
-						A2($elm$html$Html$Attributes$style, 'margin', '0')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(content)
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
+								A2($elm$html$Html$Attributes$style, 'margin-bottom', '4px'),
+								A2($elm$html$Html$Attributes$style, 'letter-spacing', '0.03em'),
+								A2($elm$html$Html$Attributes$style, 'text-transform', 'uppercase'),
+								A2($elm$html$Html$Attributes$style, 'font-size', '11px'),
+								A2($elm$html$Html$Attributes$style, 'color', '#43518b')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Value at cursor')
+							])),
+						A2(
+						$elm$html$Html$pre,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'white-space', 'pre-wrap'),
+								A2($elm$html$Html$Attributes$style, 'margin', '0')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(content)
+							]))
 					]))
 			]));
 };
@@ -24142,14 +24230,10 @@ var $author$project$Main$viewTypePane = function (model) {
 		_List_fromArray(
 			[
 				A2($elm$html$Html$Attributes$style, 'height', '200px'),
-				A2($elm$html$Html$Attributes$style, 'padding', '8px'),
+				A2($elm$html$Html$Attributes$style, 'padding', '0 8px 10px 8px'),
 				A2($elm$html$Html$Attributes$style, 'border-right', '1px solid #ccc'),
 				A2($elm$html$Html$Attributes$style, 'font-family', 'monospace'),
-				A2($elm$html$Html$Attributes$style, 'font-size', '14px'),
-				A2($elm$html$Html$Attributes$style, 'background-color', '#fafafa'),
-				A2($elm$html$Html$Attributes$style, 'overflow-wrap', 'break-word'),
-				A2($elm$html$Html$Attributes$style, 'overflow-x', 'hidden'),
-				A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto')
+				A2($elm$html$Html$Attributes$style, 'font-size', '13px')
 			]),
 		_List_fromArray(
 			[
@@ -24157,25 +24241,46 @@ var $author$project$Main$viewTypePane = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
-						A2($elm$html$Html$Attributes$style, 'margin-bottom', '6px')
+						A2($elm$html$Html$Attributes$style, 'margin', '8px 4px'),
+						A2($elm$html$Html$Attributes$style, 'padding', '8px 10px'),
+						A2($elm$html$Html$Attributes$style, 'border-radius', '8px'),
+						A2($elm$html$Html$Attributes$style, 'background', 'linear-gradient(180deg,#fafafa,#f0f0f5)'),
+						A2($elm$html$Html$Attributes$style, 'box-shadow', '0 1px 2px rgba(0,0,0,0.08)'),
+						A2($elm$html$Html$Attributes$style, 'overflow-wrap', 'break-word'),
+						A2($elm$html$Html$Attributes$style, 'overflow-x', 'hidden'),
+						A2($elm$html$Html$Attributes$style, 'overflow-y', 'auto')
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Type at cursor')
-					])),
-				A2(
-				$elm$html$Html$pre,
-				_List_fromArray(
-					[
-						A2($elm$html$Html$Attributes$style, 'white-space', 'pre-wrap'),
-						A2($elm$html$Html$Attributes$style, 'margin', '0'),
-						A2($elm$html$Html$Attributes$style, 'word-break', 'break-word')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$Main$getTypeAtCursor(model.location))
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'font-weight', 'bold'),
+								A2($elm$html$Html$Attributes$style, 'margin-bottom', '4px'),
+								A2($elm$html$Html$Attributes$style, 'letter-spacing', '0.03em'),
+								A2($elm$html$Html$Attributes$style, 'text-transform', 'uppercase'),
+								A2($elm$html$Html$Attributes$style, 'font-size', '11px'),
+								A2($elm$html$Html$Attributes$style, 'color', '#555')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Type at cursor')
+							])),
+						A2(
+						$elm$html$Html$pre,
+						_List_fromArray(
+							[
+								A2($elm$html$Html$Attributes$style, 'white-space', 'pre-wrap'),
+								A2($elm$html$Html$Attributes$style, 'margin', '0'),
+								A2($elm$html$Html$Attributes$style, 'word-break', 'break-word'),
+								A2($elm$html$Html$Attributes$style, 'color', '#222')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$author$project$Main$getTypeAtCursor(model.location))
+							]))
 					]))
 			]));
 };
