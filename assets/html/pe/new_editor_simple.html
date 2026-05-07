@@ -7207,6 +7207,100 @@ var $author$project$Types$AutoComp = function (a) {
 var $author$project$Types$Pasting = function (a) {
 	return {$: 'Pasting', a: a};
 };
+var $author$project$TypeChecker$synthesizeType = function (expr) {
+	synthesizeType:
+	while (true) {
+		switch (expr.$) {
+			case 'Const':
+				var ty = expr.b;
+				return ty;
+			case 'Hole':
+				var ty = expr.a;
+				return ty;
+			case 'Variable':
+				var ty = expr.b;
+				return ty;
+			case 'FunApp':
+				var appStyle = expr.a;
+				var functionInfo = expr.b;
+				var args = expr.c;
+				var ty = expr.d;
+				if (appStyle.$ === 'InfixApplication') {
+					var _v2 = functionInfo.name;
+					switch (_v2) {
+						case '<':
+							return $author$project$Types$TBool;
+						case '>':
+							return $author$project$Types$TBool;
+						case '<=':
+							return $author$project$Types$TBool;
+						case '>=':
+							return $author$project$Types$TBool;
+						case '==':
+							return $author$project$Types$TBool;
+						case '/=':
+							return $author$project$Types$TBool;
+						case '&&':
+							return $author$project$Types$TBool;
+						case '||':
+							return $author$project$Types$TBool;
+						default:
+							return ty;
+					}
+				} else {
+					return ty;
+				}
+			case 'Parens':
+				var innerExpr = expr.a;
+				var $temp$expr = innerExpr;
+				expr = $temp$expr;
+				continue synthesizeType;
+			case 'IfExpression':
+				var thenExpr = expr.b;
+				var ty = expr.d;
+				return ty;
+			default:
+				var ty = expr.c;
+				return ty;
+		}
+	}
+};
+var $author$project$Main$buildClipboardItem = function (loc) {
+	_v0$3:
+	while (true) {
+		switch (loc.$) {
+			case 'LocExpression':
+				var expr = loc.a;
+				return $elm$core$Maybe$Just(
+					{
+						expr: expr,
+						ty: $author$project$TypeChecker$synthesizeType(expr)
+					});
+			case 'LocFunAppName':
+				var expr = loc.a;
+				return $elm$core$Maybe$Just(
+					{
+						expr: expr,
+						ty: $author$project$TypeChecker$synthesizeType(expr)
+					});
+			case 'LocDef':
+				if (loc.a.$ === 'DefExp') {
+					var _v1 = loc.a;
+					var valExp = _v1.b;
+					return $elm$core$Maybe$Just(
+						{
+							expr: valExp,
+							ty: $author$project$TypeChecker$synthesizeType(valExp)
+						});
+				} else {
+					break _v0$3;
+				}
+			default:
+				break _v0$3;
+		}
+	}
+	return $elm$core$Maybe$Nothing;
+};
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
@@ -7245,6 +7339,17 @@ var $elm$core$List$drop = F2(
 				}
 			}
 		}
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
 	});
 var $author$project$Overlaps$getDefName = function (def) {
 	switch (def.$) {
@@ -7594,17 +7699,6 @@ var $author$project$ElmBasics$builtInSignatures = _List_fromArray(
 		resultTy: $author$project$Types$TFloat
 	}
 	]);
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
 		if (maybe.$ === 'Just') {
@@ -7814,6 +7908,46 @@ var $author$project$Handlers$getDefParamsAndResult = F2(
 			return $author$project$ElmBasics$getBuiltInParamsAndResult(name);
 		}
 	});
+var $author$project$TypeChecker$getExpectedType = function (location) {
+	switch (location.$) {
+		case 'LocExpression':
+			var expr = location.a;
+			var path = location.b;
+			var caret = location.c;
+			if (expr.$ === 'Hole') {
+				var ty = expr.a;
+				return ty;
+			} else {
+				if (path.$ === 'DefExpVal') {
+					return $author$project$Types$TNum;
+				} else {
+					return $author$project$Cursor$getExpressionType(expr);
+				}
+			}
+		case 'LocFunAppName':
+			var expr = location.a;
+			var path = location.b;
+			var caret = location.c;
+			if (path.$ === 'DefExpVal') {
+				return $author$project$Types$TNum;
+			} else {
+				return $author$project$Cursor$getExpressionType(expr);
+			}
+		case 'LocParen':
+			var expr = location.a;
+			var path = location.b;
+			var caret = location.c;
+			if (path.$ === 'DefExpVal') {
+				return $author$project$Types$TNum;
+			} else {
+				return $author$project$Cursor$getExpressionType(expr);
+			}
+		default:
+			var defPath = location.b;
+			var caret = location.c;
+			return $author$project$Types$TInt;
+	}
+};
 var $elm$core$String$toLower = _String_toLower;
 var $author$project$Handlers$filterSuggestions = F2(
 	function (buffer, suggestions) {
@@ -8109,46 +8243,6 @@ var $author$project$Handlers$getDefType = F2(
 			return $author$project$ElmBasics$getBuiltInType(name);
 		}
 	});
-var $author$project$TypeChecker$getExpectedType = function (location) {
-	switch (location.$) {
-		case 'LocExpression':
-			var expr = location.a;
-			var path = location.b;
-			var caret = location.c;
-			if (expr.$ === 'Hole') {
-				var ty = expr.a;
-				return ty;
-			} else {
-				if (path.$ === 'DefExpVal') {
-					return $author$project$Types$TNum;
-				} else {
-					return $author$project$Cursor$getExpressionType(expr);
-				}
-			}
-		case 'LocFunAppName':
-			var expr = location.a;
-			var path = location.b;
-			var caret = location.c;
-			if (path.$ === 'DefExpVal') {
-				return $author$project$Types$TNum;
-			} else {
-				return $author$project$Cursor$getExpressionType(expr);
-			}
-		case 'LocParen':
-			var expr = location.a;
-			var path = location.b;
-			var caret = location.c;
-			if (path.$ === 'DefExpVal') {
-				return $author$project$Types$TNum;
-			} else {
-				return $author$project$Cursor$getExpressionType(expr);
-			}
-		default:
-			var defPath = location.b;
-			var caret = location.c;
-			return $author$project$Types$TInt;
-	}
-};
 var $author$project$TypeChecker$isTypeCompatible = F2(
 	function (actualType, expectedType) {
 		switch (expectedType.$) {
@@ -9036,64 +9130,6 @@ var $author$project$Handlers$resultTypeForInsertedOperator = F2(
 			return $author$project$TypeChecker$getOperatorResultType(opName);
 		}
 	});
-var $author$project$TypeChecker$synthesizeType = function (expr) {
-	synthesizeType:
-	while (true) {
-		switch (expr.$) {
-			case 'Const':
-				var ty = expr.b;
-				return ty;
-			case 'Hole':
-				var ty = expr.a;
-				return ty;
-			case 'Variable':
-				var ty = expr.b;
-				return ty;
-			case 'FunApp':
-				var appStyle = expr.a;
-				var functionInfo = expr.b;
-				var args = expr.c;
-				var ty = expr.d;
-				if (appStyle.$ === 'InfixApplication') {
-					var _v2 = functionInfo.name;
-					switch (_v2) {
-						case '<':
-							return $author$project$Types$TBool;
-						case '>':
-							return $author$project$Types$TBool;
-						case '<=':
-							return $author$project$Types$TBool;
-						case '>=':
-							return $author$project$Types$TBool;
-						case '==':
-							return $author$project$Types$TBool;
-						case '/=':
-							return $author$project$Types$TBool;
-						case '&&':
-							return $author$project$Types$TBool;
-						case '||':
-							return $author$project$Types$TBool;
-						default:
-							return ty;
-					}
-				} else {
-					return ty;
-				}
-			case 'Parens':
-				var innerExpr = expr.a;
-				var $temp$expr = innerExpr;
-				expr = $temp$expr;
-				continue synthesizeType;
-			case 'IfExpression':
-				var thenExpr = expr.b;
-				var ty = expr.d;
-				return ty;
-			default:
-				var ty = expr.c;
-				return ty;
-		}
-	}
-};
 var $author$project$TypeChecker$validateEdit = F2(
 	function (location, newExpr) {
 		var synthesizedType = $author$project$TypeChecker$synthesizeType(newExpr);
@@ -16272,6 +16308,108 @@ var $author$project$Handlers$paramHasDuplicate = function (location) {
 		return false;
 	}
 };
+var $author$project$Main$sanitizeExprForPaste = F2(
+	function (expr, destLoc) {
+		switch (expr.$) {
+			case 'Variable':
+				var name = expr.a;
+				var ty = expr.b;
+				var _v1 = A2($author$project$Handlers$getDefType, name, destLoc);
+				if (_v1.$ === 'Just') {
+					return expr;
+				} else {
+					return $author$project$Types$Hole(ty);
+				}
+			case 'FunApp':
+				var style = expr.a;
+				var fi = expr.b;
+				var args = expr.c;
+				var ty = expr.d;
+				return A4(
+					$author$project$Types$FunApp,
+					style,
+					fi,
+					A2(
+						$elm$core$List$map,
+						function (a) {
+							return A2($author$project$Main$sanitizeExprForPaste, a, destLoc);
+						},
+						args),
+					ty);
+			case 'Parens':
+				var inner = expr.a;
+				return $author$project$Types$Parens(
+					A2($author$project$Main$sanitizeExprForPaste, inner, destLoc));
+			case 'IfExpression':
+				var c = expr.a;
+				var t = expr.b;
+				var e = expr.c;
+				var ty = expr.d;
+				return A4(
+					$author$project$Types$IfExpression,
+					A2($author$project$Main$sanitizeExprForPaste, c, destLoc),
+					A2($author$project$Main$sanitizeExprForPaste, t, destLoc),
+					A2($author$project$Main$sanitizeExprForPaste, e, destLoc),
+					ty);
+			case 'LetIn':
+				var defs = expr.a;
+				var body = expr.b;
+				var ty = expr.c;
+				return A3(
+					$author$project$Types$LetIn,
+					defs,
+					A2($author$project$Main$sanitizeExprForPaste, body, destLoc),
+					ty);
+			default:
+				return expr;
+		}
+	});
+var $author$project$Main$pasteClipboardItem = F3(
+	function (item, origin, model) {
+		var exprToInsert = A2($author$project$Main$sanitizeExprForPaste, item.expr, origin);
+		_v0$2:
+		while (true) {
+			switch (origin.$) {
+				case 'LocExpression':
+					var path = origin.b;
+					return _Utils_update(
+						model,
+						{
+							location: A3(
+								$author$project$Types$LocExpression,
+								exprToInsert,
+								path,
+								$author$project$Types$CaretAt(
+									{column: 0, line: 0})),
+							state: $author$project$Types$Cursing
+						});
+				case 'LocDef':
+					if (origin.a.$ === 'DefExp') {
+						var _v1 = origin.a;
+						var name = _v1.a;
+						var defPath = origin.b;
+						return _Utils_update(
+							model,
+							{
+								location: A3(
+									$author$project$Types$LocDef,
+									A2($author$project$Types$DefExp, name, exprToInsert),
+									defPath,
+									$author$project$Types$CaretAt(
+										{column: 0, line: 0})),
+								state: $author$project$Types$Cursing
+							});
+					} else {
+						break _v0$2;
+					}
+				default:
+					break _v0$2;
+			}
+		}
+		return _Utils_update(
+			model,
+			{state: $author$project$Types$Cursing});
+	});
 var $author$project$Main$pushUndo = function (model) {
 	return _Utils_update(
 		model,
@@ -19172,30 +19310,30 @@ var $author$project$Main$stripFirstArgWhenLeavingVariantArg = F2(
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var _v29 = A2($author$project$Main$updateInner, msg, model);
-		var newModel = _v29.a;
-		var cmd = _v29.b;
+		var _v31 = A2($author$project$Main$updateInner, msg, model);
+		var newModel = _v31.a;
+		var cmd = _v31.b;
 		var selection = function () {
-			var _v30 = _Utils_Tuple2(msg, model.location);
-			_v30$2:
+			var _v32 = _Utils_Tuple2(msg, model.location);
+			_v32$2:
 			while (true) {
-				if ((_v30.b.$ === 'LocDef') && (_v30.b.c.$ === 'SelectWholeDef')) {
-					switch (_v30.a.$) {
+				if ((_v32.b.$ === 'LocDef') && (_v32.b.c.$ === 'SelectWholeDef')) {
+					switch (_v32.a.$) {
 						case 'RemoveCharAfter':
-							var _v31 = _v30.a;
-							var _v32 = _v30.b;
-							var _v33 = _v32.c;
+							var _v33 = _v32.a;
+							var _v34 = _v32.b;
+							var _v35 = _v34.c;
 							return newModel.selection;
 						case 'RemoveCharBefore':
-							var _v34 = _v30.a;
-							var _v35 = _v30.b;
-							var _v36 = _v35.c;
+							var _v36 = _v32.a;
+							var _v37 = _v32.b;
+							var _v38 = _v37.c;
 							return newModel.selection;
 						default:
-							break _v30$2;
+							break _v32$2;
 					}
 				} else {
-					break _v30$2;
+					break _v32$2;
 				}
 			}
 			return $author$project$Types$NoSelection;
@@ -19272,9 +19410,39 @@ var $author$project$Main$updateInner = F2(
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'Copy':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var m = $author$project$Main$pushUndo(model);
+				var _v3 = $author$project$Main$buildClipboardItem(m.location);
+				if (_v3.$ === 'Just') {
+					var item = _v3.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								clipboard: A2($elm$core$List$cons, item, m.clipboard)
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(m, $elm$core$Platform$Cmd$none);
+				}
 			case 'StartPaste':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var expectedTy = $author$project$TypeChecker$getExpectedType(model.location);
+				var candidates = A2(
+					$elm$core$List$filter,
+					function (item) {
+						return A2(
+							$author$project$TypeChecker$isTypeCompatible,
+							$author$project$TypeChecker$synthesizeType(item.expr),
+							expectedTy);
+					},
+					model.clipboard);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							state: $author$project$Types$Pasting(
+								{candidates: candidates, origin: model.location, selectedIndex: 0})
+						}),
+					$elm$core$Platform$Cmd$none);
 			case 'ExamplesFetchResult':
 				var result = msg.a;
 				if (result.$ === 'Err') {
@@ -19332,12 +19500,12 @@ var $author$project$Main$updateInner = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'LoadExample':
-				var _v4 = $elm$core$List$head(
+				var _v5 = $elm$core$List$head(
 					A2($elm$core$List$drop, model.selectedExampleIndex, model.exampleCatalog));
-				if (_v4.$ === 'Nothing') {
+				if (_v5.$ === 'Nothing') {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var entry = _v4.a;
+					var entry = _v5.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -19359,12 +19527,12 @@ var $author$project$Main$updateInner = F2(
 				if ($author$project$Handlers$paramHasDuplicate(model.location)) {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var _v5 = model.state;
-					switch (_v5.$) {
+					var _v6 = model.state;
+					switch (_v6.$) {
 						case 'AutoComp':
-							var buffer = _v5.a.buffer;
-							var suggestions = _v5.a.suggestions;
-							var selectedIndex = _v5.a.selectedIndex;
+							var buffer = _v6.a.buffer;
+							var suggestions = _v6.a.suggestions;
+							var selectedIndex = _v6.a.selectedIndex;
 							if ($elm$core$List$isEmpty(suggestions)) {
 								return _Utils_Tuple2(
 									_Utils_update(
@@ -19384,7 +19552,7 @@ var $author$project$Main$updateInner = F2(
 										'suggestion-' + $elm$core$String$fromInt(newIndex)));
 							}
 						case 'Pasting':
-							var pasteState = _v5.a;
+							var pasteState = _v6.a;
 							var newIndex = A2($elm$core$Basics$max, 0, pasteState.selectedIndex - 1);
 							return _Utils_Tuple2(
 								_Utils_update(
@@ -19426,12 +19594,12 @@ var $author$project$Main$updateInner = F2(
 				if ($author$project$Handlers$paramHasDuplicate(model.location)) {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				} else {
-					var _v6 = model.state;
-					switch (_v6.$) {
+					var _v7 = model.state;
+					switch (_v7.$) {
 						case 'AutoComp':
-							var buffer = _v6.a.buffer;
-							var suggestions = _v6.a.suggestions;
-							var selectedIndex = _v6.a.selectedIndex;
+							var buffer = _v7.a.buffer;
+							var suggestions = _v7.a.suggestions;
+							var selectedIndex = _v7.a.selectedIndex;
 							if ($elm$core$List$isEmpty(suggestions)) {
 								return _Utils_Tuple2(
 									_Utils_update(
@@ -19452,7 +19620,7 @@ var $author$project$Main$updateInner = F2(
 										'suggestion-' + $elm$core$String$fromInt(newIndex)));
 							}
 						case 'Pasting':
-							var pasteState = _v6.a;
+							var pasteState = _v7.a;
 							var maxIndex = $elm$core$List$length(pasteState.candidates) - 1;
 							var newIndex = A2($elm$core$Basics$min, maxIndex, pasteState.selectedIndex + 1);
 							return _Utils_Tuple2(
@@ -19541,18 +19709,18 @@ var $author$project$Main$updateInner = F2(
 						$author$project$Main$pushUndo(model)),
 					$elm$core$Platform$Cmd$none);
 			case 'InsertTab':
-				var _v7 = model.state;
-				switch (_v7.$) {
+				var _v8 = model.state;
+				switch (_v8.$) {
 					case 'AutoComp':
-						var buffer = _v7.a.buffer;
-						var suggestions = _v7.a.suggestions;
-						var selectedIndex = _v7.a.selectedIndex;
-						var _v8 = $elm$core$List$head(
+						var buffer = _v8.a.buffer;
+						var suggestions = _v8.a.suggestions;
+						var selectedIndex = _v8.a.selectedIndex;
+						var _v9 = $elm$core$List$head(
 							A2($elm$core$List$drop, selectedIndex, suggestions));
-						if (_v8.$ === 'Just') {
-							var _v9 = _v8.a;
-							var name = _v9.a;
-							var ty = _v9.b;
+						if (_v9.$ === 'Just') {
+							var _v10 = _v9.a;
+							var name = _v10.a;
+							var ty = _v10.b;
 							return _Utils_Tuple2(
 								A2(
 									$author$project$Main$update,
@@ -19593,18 +19761,18 @@ var $author$project$Main$updateInner = F2(
 						$author$project$Main$pushUndo(model)),
 					$elm$core$Platform$Cmd$none);
 			case 'NewLine':
-				var _v10 = model.state;
-				switch (_v10.$) {
+				var _v11 = model.state;
+				switch (_v11.$) {
 					case 'AutoComp':
-						var buffer = _v10.a.buffer;
-						var suggestions = _v10.a.suggestions;
-						var selectedIndex = _v10.a.selectedIndex;
-						var _v11 = $elm$core$List$head(
+						var buffer = _v11.a.buffer;
+						var suggestions = _v11.a.suggestions;
+						var selectedIndex = _v11.a.selectedIndex;
+						var _v12 = $elm$core$List$head(
 							A2($elm$core$List$drop, selectedIndex, suggestions));
-						if (_v11.$ === 'Just') {
-							var _v12 = _v11.a;
-							var name = _v12.a;
-							var ty = _v12.b;
+						if (_v12.$ === 'Just') {
+							var _v13 = _v12.a;
+							var name = _v13.a;
+							var ty = _v13.b;
 							return _Utils_Tuple2(
 								A2(
 									$author$project$Main$update,
@@ -19619,11 +19787,20 @@ var $author$project$Main$updateInner = F2(
 								$elm$core$Platform$Cmd$none);
 						}
 					case 'Pasting':
-						return _Utils_Tuple2(
-							_Utils_update(
-								model,
-								{state: $author$project$Types$Cursing}),
-							$elm$core$Platform$Cmd$none);
+						var pasteState = _v11.a;
+						var _v14 = $elm$core$List$head(
+							A2($elm$core$List$drop, pasteState.selectedIndex, pasteState.candidates));
+						if (_v14.$ === 'Just') {
+							var item = _v14.a;
+							var newModel = A3($author$project$Main$pasteClipboardItem, item, pasteState.origin, model);
+							return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
+						} else {
+							return _Utils_Tuple2(
+								_Utils_update(
+									model,
+									{state: $author$project$Types$Cursing}),
+								$elm$core$Platform$Cmd$none);
+						}
 					case 'Cursing':
 						return _Utils_Tuple2(
 							$author$project$Handlers$handleNewLine(
@@ -19636,8 +19813,8 @@ var $author$project$Main$updateInner = F2(
 							$elm$core$Platform$Cmd$none);
 				}
 			case 'Escape':
-				var _v13 = model.state;
-				if (_v13.$ === 'Pasting') {
+				var _v15 = model.state;
+				if (_v15.$ === 'Pasting') {
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -19652,10 +19829,10 @@ var $author$project$Main$updateInner = F2(
 				}
 			case 'SelectSuggestion':
 				var index = msg.a;
-				var _v14 = model.state;
-				if (_v14.$ === 'AutoComp') {
-					var buffer = _v14.a.buffer;
-					var suggestions = _v14.a.suggestions;
+				var _v16 = model.state;
+				if (_v16.$ === 'AutoComp') {
+					var buffer = _v16.a.buffer;
+					var suggestions = _v16.a.suggestions;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -19677,10 +19854,10 @@ var $author$project$Main$updateInner = F2(
 				var m = $author$project$Main$pushUndo(model);
 				var newLocation = function () {
 					if (name === 'if') {
-						var _v15 = m.location;
-						if (_v15.$ === 'LocExpression') {
-							var expr = _v15.a;
-							var path = _v15.b;
+						var _v17 = m.location;
+						if (_v17.$ === 'LocExpression') {
+							var expr = _v17.a;
+							var path = _v17.b;
 							var resultTy = function () {
 								if (expr.$ === 'Hole') {
 									var holeTy = expr.a;
@@ -19713,9 +19890,9 @@ var $author$project$Main$updateInner = F2(
 						}
 					} else {
 						if (name === 'True') {
-							var _v18 = m.location;
-							if (_v18.$ === 'LocExpression') {
-								var path = _v18.b;
+							var _v20 = m.location;
+							if (_v20.$ === 'LocExpression') {
+								var path = _v20.b;
 								return A3(
 									$author$project$Types$LocExpression,
 									A2(
@@ -19730,9 +19907,9 @@ var $author$project$Main$updateInner = F2(
 							}
 						} else {
 							if (name === 'False') {
-								var _v19 = m.location;
-								if (_v19.$ === 'LocExpression') {
-									var path = _v19.b;
+								var _v21 = m.location;
+								if (_v21.$ === 'LocExpression') {
+									var path = _v21.b;
 									return A3(
 										$author$project$Types$LocExpression,
 										A2(
@@ -19746,11 +19923,11 @@ var $author$project$Main$updateInner = F2(
 									return m.location;
 								}
 							} else {
-								var _v20 = A2($author$project$Handlers$getDefParamsAndResult, name, m.location);
-								if (_v20.$ === 'Just') {
-									var _v21 = _v20.a;
-									var params = _v21.a;
-									var resultTy = _v21.b;
+								var _v22 = A2($author$project$Handlers$getDefParamsAndResult, name, m.location);
+								if (_v22.$ === 'Just') {
+									var _v23 = _v22.a;
+									var params = _v23.a;
+									var resultTy = _v23.b;
 									var wrapIfCompound = function (e) {
 										switch (e.$) {
 											case 'Const':
@@ -19798,12 +19975,12 @@ var $author$project$Main$updateInner = F2(
 											params);
 										return holes;
 									}();
-									var _v22 = m.location;
-									switch (_v22.$) {
+									var _v24 = m.location;
+									switch (_v24.$) {
 										case 'LocExpression':
-											var expr = _v22.a;
-											var path = _v22.b;
-											var caret = _v22.c;
+											var expr = _v24.a;
+											var path = _v24.b;
+											var caret = _v24.c;
 											if (expr.$ === 'Hole') {
 												var holes = buildHolesArgs;
 												var restArgs = A2($elm$core$List$drop, 1, holes);
@@ -19864,8 +20041,8 @@ var $author$project$Main$updateInner = F2(
 												}
 											}
 										case 'LocFunAppName':
-											var expr = _v22.a;
-											var path = _v22.b;
+											var expr = _v24.a;
+											var path = _v24.b;
 											var args = buildWrappedArgs(expr);
 											var appExpr = A4($author$project$Types$FunApp, $author$project$Types$NormalApplication, fi, args, resultTy);
 											return $author$project$Cursor$findLeftmostLocation(
@@ -19874,11 +20051,11 @@ var $author$project$Main$updateInner = F2(
 											return m.location;
 									}
 								} else {
-									var _v27 = m.location;
-									if (_v27.$ === 'LocExpression') {
-										var expr = _v27.a;
-										var path = _v27.b;
-										var caret = _v27.c;
+									var _v29 = m.location;
+									if (_v29.$ === 'LocExpression') {
+										var expr = _v29.a;
+										var path = _v29.b;
+										var caret = _v29.c;
 										switch (expr.$) {
 											case 'Variable':
 												return A3(
@@ -20104,7 +20281,9 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $author$project$Types$Copy = {$: 'Copy'};
 var $author$project$Types$Redo = {$: 'Redo'};
+var $author$project$Types$StartPaste = {$: 'StartPaste'};
 var $author$project$Types$Undo = {$: 'Undo'};
 var $author$project$Types$InsertChar = function (a) {
 	return {$: 'InsertChar', a: a};
@@ -20388,14 +20567,16 @@ var $author$project$Main$keyDecoderWithPrevent = A2(
 			_Utils_Tuple2(
 				mods.shift ? $author$project$Types$Redo : $author$project$Types$Undo,
 				true)) : ((mod && (((mods.key === 'KeyY') || (mods.key === 'y')) && (!mods.shift))) ? $elm$json$Json$Decode$succeed(
-			_Utils_Tuple2($author$project$Types$Redo, true)) : A2(
+			_Utils_Tuple2($author$project$Types$Redo, true)) : ((mod && ((mods.key === 'KeyC') || (mods.key === 'c'))) ? $elm$json$Json$Decode$succeed(
+			_Utils_Tuple2($author$project$Types$Copy, true)) : ((mod && ((mods.key === 'KeyV') || (mods.key === 'v'))) ? $elm$json$Json$Decode$succeed(
+			_Utils_Tuple2($author$project$Types$StartPaste, true)) : A2(
 			$elm$json$Json$Decode$map,
 			function (msg) {
 				return _Utils_Tuple2(
 					msg,
 					$author$project$Main$preventDefaultForKey(msg));
 			},
-			$author$project$Main$keyDecoder));
+			$author$project$Main$keyDecoder))));
 	},
 	A5(
 		$elm$json$Json$Decode$map4,
@@ -25020,6 +25201,18 @@ var $author$project$LocationTreeView$addCaretMeta = F2(
 	});
 var $author$project$LocationTreeView$Ambient = {$: 'Ambient'};
 var $author$project$LocationTreeView$ZipperFocus = {$: 'ZipperFocus'};
+var $author$project$LocationTreeView$appStyleStr = function (style) {
+	switch (style.$) {
+		case 'NormalApplication':
+			return 'NormalApplication';
+		case 'InfixApplication':
+			return 'InfixApplication';
+		case 'ForwardPipe':
+			return 'ForwardPipe';
+		default:
+			return 'BackwardPipe';
+	}
+};
 var $author$project$LocationTreeView$constStr = function (cv) {
 	switch (cv.$) {
 		case 'ConstInt':
@@ -25253,13 +25446,13 @@ var $author$project$LocationTreeView$defAstAmbient = F2(
 						children: A2(
 							$elm$core$List$indexedMap,
 							F2(
-								function (i, v) {
+								function (_v1, v) {
 									return $author$project$LocationTreeView$TreeNode(
 										{
 											children: A2(
 												$elm$core$List$indexedMap,
 												F2(
-													function (j, t) {
+													function (_v2, t) {
 														return $author$project$LocationTreeView$TreeNode(
 															{
 																children: _List_Nil,
@@ -25283,17 +25476,8 @@ var $author$project$LocationTreeView$defAstAmbient = F2(
 		}
 	});
 var $author$project$LocationTreeView$focusedFunAppLabel = F2(
-	function (style, fi) {
-		switch (style.$) {
-			case 'InfixApplication':
-				return 'FunApp · infix `' + (fi.name + '`');
-			case 'NormalApplication':
-				return 'FunApp · `' + (fi.name + '`');
-			case 'ForwardPipe':
-				return 'FunApp · |>` ' + fi.name;
-			default:
-				return 'FunApp · `' + (fi.name + ' `<|');
-		}
+	function (_v0, _v1) {
+		return 'FunApp';
 	});
 var $author$project$LocationTreeView$maxAstDepth = 8;
 var $author$project$LocationTreeView$focusExprTree = function (expr) {
@@ -25338,10 +25522,10 @@ var $author$project$LocationTreeView$focusExprTree = function (expr) {
 			return $author$project$LocationTreeView$TreeNode(
 				{
 					children: _List_Nil,
-					label: A2($author$project$LocationTreeView$focusedFunAppLabel, style, fi) + ' · whole node',
+					label: A2($author$project$LocationTreeView$focusedFunAppLabel, style, fi),
 					meta: $elm$core$Maybe$Just(
-						':' + ($author$project$LocationTreeView$tyStr(ty) + (' · ' + ($elm$core$String$fromInt(
-							$elm$core$List$length(args)) + ' arg(s)')))),
+						'op = ' + (fi.name + (', style = ' + ($author$project$LocationTreeView$appStyleStr(style) + (', type = ' + ($author$project$LocationTreeView$tyStr(ty) + (', arity = ' + $elm$core$String$fromInt(
+							$elm$core$List$length(args))))))))),
 					role: $author$project$LocationTreeView$ZipperFocus
 				});
 		case 'Parens':
@@ -25352,7 +25536,7 @@ var $author$project$LocationTreeView$focusExprTree = function (expr) {
 						[
 							A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth - 1, $author$project$LocationTreeView$Ambient, inner)
 						]),
-					label: 'Parens · node',
+					label: 'Parens',
 					meta: $elm$core$Maybe$Nothing,
 					role: $author$project$LocationTreeView$ZipperFocus
 				});
@@ -25378,7 +25562,7 @@ var $author$project$LocationTreeView$focusExprTree = function (expr) {
 							'else',
 							A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, else_))
 						]),
-					label: 'IfExpression · node',
+					label: 'IfExpression',
 					meta: $elm$core$Maybe$Just(
 						':' + $author$project$LocationTreeView$tyStr(ty)),
 					role: $author$project$LocationTreeView$ZipperFocus
@@ -25401,7 +25585,7 @@ var $author$project$LocationTreeView$focusExprTree = function (expr) {
 								'in body',
 								A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, body))
 							])),
-					label: 'LetIn · node',
+					label: 'LetIn',
 					meta: $elm$core$Maybe$Just(
 						':' + $author$project$LocationTreeView$tyStr(ty)),
 					role: $author$project$LocationTreeView$ZipperFocus
@@ -25412,51 +25596,8 @@ var $author$project$LocationTreeView$pathEndMarker = $author$project$LocationTre
 	{children: _List_Nil, label: 'DefExpInModule', meta: $elm$core$Maybe$Nothing, role: $author$project$LocationTreeView$Ambient});
 var $author$project$LocationTreeView$ZipperSpine = {$: 'ZipperSpine'};
 var $author$project$LocationTreeView$funAppHeaderLabel = F2(
-	function (style, fi) {
-		switch (style.$) {
-			case 'InfixApplication':
-				return '⊂ FunApp · infix `' + (fi.name + '`');
-			case 'NormalApplication':
-				return '⊂ FunApp · `' + (fi.name + '`');
-			case 'ForwardPipe':
-				return '⊂ FunApp · |>` ' + fi.name;
-			default:
-				return '⊂ FunApp · `' + (fi.name + ' `<|');
-		}
-	});
-var $author$project$LocationTreeView$shortExprSketch = function (e) {
-	switch (e.$) {
-		case 'Const':
-			var c = e.a;
-			return $author$project$LocationTreeView$constStr(c);
-		case 'Hole':
-			return '⟨hole⟩';
-		case 'Variable':
-			var n = e.a;
-			return n;
-		case 'FunApp':
-			var fi = e.b;
-			return '`' + (fi.name + '`(…)');
-		case 'Parens':
-			return '(…)';
-		case 'IfExpression':
-			return 'if …';
-		default:
-			return 'let …';
-	}
-};
-var $author$project$LocationTreeView$siblingSketch = F2(
-	function (idx, args) {
-		return A2(
-			$elm$core$String$join,
-			' · ',
-			A2(
-				$elm$core$List$indexedMap,
-				F2(
-					function (i, e) {
-						return _Utils_eq(i, idx) ? '⟨here⟩' : $author$project$LocationTreeView$shortExprSketch(e);
-					}),
-				args));
+	function (_v0, _v1) {
+		return 'FunAppArg';
 	});
 var $author$project$LocationTreeView$spineWrappersInnerToOuter = F2(
 	function (focusExpr, path) {
@@ -25470,7 +25611,7 @@ var $author$project$LocationTreeView$spineWrappersInnerToOuter = F2(
 							{
 								children: _List_fromArray(
 									[t]),
-								label: '⊂ DefExp · `' + (name + '` · RHS'),
+								label: 'DefExpVal',
 								meta: $elm$core$Maybe$Nothing,
 								role: $author$project$LocationTreeView$ZipperSpine
 							});
@@ -25486,10 +25627,10 @@ var $author$project$LocationTreeView$spineWrappersInnerToOuter = F2(
 							{
 								children: _List_fromArray(
 									[child]),
-								label: '⊂ DefFun · `' + (name + '` · body'),
-								meta: $elm$core$List$isEmpty(params) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-									$elm$core$String$fromInt(
-										$elm$core$List$length(params)) + ' param(s)'),
+								label: 'DefFunBodyVal',
+								meta: $elm$core$List$isEmpty(params) ? $elm$core$Maybe$Just('name = ' + name) : $elm$core$Maybe$Just(
+									'name = ' + (name + (', params = ' + $elm$core$String$fromInt(
+										$elm$core$List$length(params))))),
 								role: $author$project$LocationTreeView$ZipperSpine
 							});
 					}
@@ -25508,152 +25649,154 @@ var $author$project$LocationTreeView$spineWrappersInnerToOuter = F2(
 							[focusExpr]),
 						right));
 				var wrapFun = function (child) {
+					var argChildren = A2(
+						$elm$core$List$indexedMap,
+						F2(
+							function (i, argExpr) {
+								return _Utils_eq(i, idx) ? A2(
+									$author$project$LocationTreeView$labelTree,
+									'arg ' + $elm$core$String$fromInt(i),
+									child) : A2(
+									$author$project$LocationTreeView$labelTree,
+									'arg ' + $elm$core$String$fromInt(i),
+									A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, argExpr));
+							}),
+						fullArgs);
 					return $author$project$LocationTreeView$TreeNode(
 						{
-							children: _List_fromArray(
-								[child]),
+							children: argChildren,
 							label: A2($author$project$LocationTreeView$funAppHeaderLabel, style, fi),
 							meta: $elm$core$Maybe$Just(
-								'arg ' + ($elm$core$String$fromInt(idx) + (' / ' + ($elm$core$String$fromInt(
-									$elm$core$List$length(fullArgs)) + (' · ' + A2($author$project$LocationTreeView$siblingSketch, idx, fullArgs)))))),
+								'index = ' + ($elm$core$String$fromInt(idx) + (', arity = ' + ($elm$core$String$fromInt(
+									$elm$core$List$length(fullArgs)) + (', op = ' + fi.name))))),
 							role: $author$project$LocationTreeView$ZipperSpine
 						});
 				};
-				return _Utils_ap(
-					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner),
-					_List_fromArray(
-						[wrapFun]));
+				return A2(
+					$elm$core$List$cons,
+					wrapFun,
+					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner));
 			case 'Parenthesized':
 				var inner = path.a;
-				return _Utils_ap(
-					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner),
-					_List_fromArray(
-						[
-							function (t) {
-							return $author$project$LocationTreeView$TreeNode(
-								{
-									children: _List_fromArray(
-										[t]),
-									label: '⊂ Parens',
-									meta: $elm$core$Maybe$Nothing,
-									role: $author$project$LocationTreeView$ZipperSpine
-								});
-						}
-						]));
+				return A2(
+					$elm$core$List$cons,
+					function (t) {
+						return $author$project$LocationTreeView$TreeNode(
+							{
+								children: _List_fromArray(
+									[t]),
+								label: 'Parenthesized',
+								meta: $elm$core$Maybe$Nothing,
+								role: $author$project$LocationTreeView$ZipperSpine
+							});
+					},
+					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner));
 			case 'IfCondition':
 				var inner = path.a;
 				var thenE = path.b;
 				var elseE = path.c;
-				return _Utils_ap(
-					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner),
-					_List_fromArray(
-						[
-							function (t) {
-							return $author$project$LocationTreeView$TreeNode(
-								{
-									children: _List_fromArray(
-										[
-											t,
-											A2(
-											$author$project$LocationTreeView$labelTree,
-											'then · off-path',
-											A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, thenE)),
-											A2(
-											$author$project$LocationTreeView$labelTree,
-											'else · off-path',
-											A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, elseE))
-										]),
-									label: '⊂ IfExpression · condition',
-									meta: $elm$core$Maybe$Nothing,
-									role: $author$project$LocationTreeView$ZipperSpine
-								});
-						}
-						]));
+				return A2(
+					$elm$core$List$cons,
+					function (t) {
+						return $author$project$LocationTreeView$TreeNode(
+							{
+								children: _List_fromArray(
+									[
+										t,
+										A2(
+										$author$project$LocationTreeView$labelTree,
+										'then',
+										A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, thenE)),
+										A2(
+										$author$project$LocationTreeView$labelTree,
+										'else',
+										A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, elseE))
+									]),
+								label: 'IfCondition',
+								meta: $elm$core$Maybe$Nothing,
+								role: $author$project$LocationTreeView$ZipperSpine
+							});
+					},
+					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner));
 			case 'IfThen':
 				var condE = path.a;
 				var inner = path.b;
 				var elseE = path.c;
-				return _Utils_ap(
-					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner),
-					_List_fromArray(
-						[
-							function (t) {
-							return $author$project$LocationTreeView$TreeNode(
-								{
-									children: _List_fromArray(
-										[
-											A2(
-											$author$project$LocationTreeView$labelTree,
-											'condition · off-path',
-											A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, condE)),
-											t,
-											A2(
-											$author$project$LocationTreeView$labelTree,
-											'else · off-path',
-											A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, elseE))
-										]),
-									label: '⊂ IfExpression · then',
-									meta: $elm$core$Maybe$Nothing,
-									role: $author$project$LocationTreeView$ZipperSpine
-								});
-						}
-						]));
+				return A2(
+					$elm$core$List$cons,
+					function (t) {
+						return $author$project$LocationTreeView$TreeNode(
+							{
+								children: _List_fromArray(
+									[
+										A2(
+										$author$project$LocationTreeView$labelTree,
+										'condition',
+										A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, condE)),
+										t,
+										A2(
+										$author$project$LocationTreeView$labelTree,
+										'else',
+										A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, elseE))
+									]),
+								label: 'IfThen',
+								meta: $elm$core$Maybe$Nothing,
+								role: $author$project$LocationTreeView$ZipperSpine
+							});
+					},
+					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner));
 			case 'IfElse':
 				var condE = path.a;
 				var thenE = path.b;
 				var inner = path.c;
-				return _Utils_ap(
-					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner),
-					_List_fromArray(
-						[
-							function (t) {
-							return $author$project$LocationTreeView$TreeNode(
-								{
-									children: _List_fromArray(
-										[
-											A2(
-											$author$project$LocationTreeView$labelTree,
-											'condition · off-path',
-											A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, condE)),
-											A2(
-											$author$project$LocationTreeView$labelTree,
-											'then · off-path',
-											A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, thenE)),
-											t
-										]),
-									label: '⊂ IfExpression · else',
-									meta: $elm$core$Maybe$Nothing,
-									role: $author$project$LocationTreeView$ZipperSpine
-								});
-						}
-						]));
+				return A2(
+					$elm$core$List$cons,
+					function (t) {
+						return $author$project$LocationTreeView$TreeNode(
+							{
+								children: _List_fromArray(
+									[
+										A2(
+										$author$project$LocationTreeView$labelTree,
+										'condition',
+										A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, condE)),
+										A2(
+										$author$project$LocationTreeView$labelTree,
+										'then',
+										A3($author$project$LocationTreeView$astTree, $author$project$LocationTreeView$maxAstDepth, $author$project$LocationTreeView$Ambient, thenE)),
+										t
+									]),
+								label: 'IfElse',
+								meta: $elm$core$Maybe$Nothing,
+								role: $author$project$LocationTreeView$ZipperSpine
+							});
+					},
+					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner));
 			default:
 				var defs = path.a;
 				var inner = path.b;
-				return _Utils_ap(
-					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner),
-					_List_fromArray(
-						[
-							function (t) {
-							return $author$project$LocationTreeView$TreeNode(
-								{
-									children: _Utils_ap(
-										A2(
-											$elm$core$List$map,
-											$author$project$LocationTreeView$defAstAmbient($author$project$LocationTreeView$maxAstDepth),
-											defs),
-										_List_fromArray(
-											[
-												A2($author$project$LocationTreeView$labelTree, 'body · focus path', t)
-											])),
-									label: '⊂ LetIn · in',
-									meta: $elm$core$Maybe$Just(
-										$elm$core$String$fromInt(
-											$elm$core$List$length(defs)) + ' local def(s)'),
-									role: $author$project$LocationTreeView$ZipperSpine
-								});
-						}
-						]));
+				return A2(
+					$elm$core$List$cons,
+					function (t) {
+						return $author$project$LocationTreeView$TreeNode(
+							{
+								children: _Utils_ap(
+									A2(
+										$elm$core$List$map,
+										$author$project$LocationTreeView$defAstAmbient($author$project$LocationTreeView$maxAstDepth),
+										defs),
+									_List_fromArray(
+										[
+											A2($author$project$LocationTreeView$labelTree, 'body', t)
+										])),
+								label: 'LetInBody',
+								meta: $elm$core$Maybe$Just(
+									$elm$core$String$fromInt(
+										$elm$core$List$length(defs)) + ' local def(s)'),
+								role: $author$project$LocationTreeView$ZipperSpine
+							});
+					},
+					A2($author$project$LocationTreeView$spineWrappersInnerToOuter, focusExpr, inner));
 		}
 	});
 var $author$project$LocationTreeView$pathSpineBelowFocus = F2(
@@ -25689,7 +25832,7 @@ var $author$project$LocationTreeView$markFocusRoot = function (_v0) {
 			{role: $author$project$LocationTreeView$ZipperFocus}));
 };
 var $author$project$LocationTreeView$defLocationTree = F3(
-	function (def, defPath, caret) {
+	function (def, _v0, caret) {
 		var inner = function () {
 			switch (def.$) {
 				case 'DefExp':
@@ -25753,7 +25896,7 @@ var $author$project$LocationTreeView$defLocationTree = F3(
 							children: A2(
 								$elm$core$List$indexedMap,
 								F2(
-									function (i, v) {
+									function (_v2, v) {
 										return $author$project$LocationTreeView$TreeNode(
 											{
 												children: A2(
@@ -25799,9 +25942,10 @@ var $author$project$LocationTreeView$funAppNameZipperTree = F2(
 						[
 							A2($author$project$LocationTreeView$pathSpineBelowFocus, expr, path)
 						]),
-					label: '⟨operator⟩',
+					label: 'LocFunAppName',
 					meta: $elm$core$Maybe$Just(
-						'`' + (fi.name + ('` · ' + (A2($author$project$LocationTreeView$funAppHeaderLabel, style, fi) + (' · :' + $author$project$LocationTreeView$tyStr(ty)))))),
+						'op = ' + (fi.name + (', style = ' + ($author$project$LocationTreeView$appStyleStr(style) + (', type = ' + ($author$project$LocationTreeView$tyStr(ty) + (', arity = ' + $elm$core$String$fromInt(
+							$elm$core$List$length(args))))))))),
 					role: $author$project$LocationTreeView$ZipperFocus
 				});
 		} else {
@@ -25816,7 +25960,7 @@ var $author$project$LocationTreeView$parenZipperTreeFocusFirst = F2(
 					[
 						A2($author$project$LocationTreeView$pathSpineBelowFocus, inner, path)
 					]),
-				label: 'Parens · cursor inside',
+				label: 'LocParen',
 				meta: $elm$core$Maybe$Nothing,
 				role: $author$project$LocationTreeView$ZipperFocus
 			});
